@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'product.dart';
-import 'database_helper.dart';
+import 'services/services.dart';
 
 class UpdateProductPage extends StatefulWidget {
   final Product product;
@@ -16,7 +16,7 @@ class _UpdateProductPageState extends State<UpdateProductPage> {
   late TextEditingController _productNameController;
   late TextEditingController _priceController;
   late TextEditingController _quantityController;
-  final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final ProductService _productService = ProductService();
 
   @override
   void initState() {
@@ -41,41 +41,15 @@ class _UpdateProductPageState extends State<UpdateProductPage> {
   }
 
   String? _validateProductName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Vui lòng nhập tên sản phẩm';
-    }
-    if (value.length < 2) {
-      return 'Tên sản phẩm phải có ít nhất 2 ký tự';
-    }
-    return null;
+    return UtilsService.validateProductName(value);
   }
 
   String? _validatePrice(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Vui lòng nhập giá sản phẩm';
-    }
-    final price = int.tryParse(value);
-    if (price == null) {
-      return 'Giá phải là số nguyên';
-    }
-    if (price <= 0) {
-      return 'Giá phải lớn hơn 0';
-    }
-    return null;
+    return UtilsService.validatePrice(value);
   }
 
   String? _validateQuantity(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Vui lòng nhập số lượng';
-    }
-    final quantity = double.tryParse(value);
-    if (quantity == null) {
-      return 'Số lượng phải là số';
-    }
-    if (quantity <= 0) {
-      return 'Số lượng phải lớn hơn 0';
-    }
-    return null;
+    return UtilsService.validateQuantity(value);
   }
 
   Future<void> _updateProduct() async {
@@ -88,23 +62,19 @@ class _UpdateProductPageState extends State<UpdateProductPage> {
       );
 
       try {
-        await _databaseHelper.updateProduct(updatedProduct);
+        await _productService.updateProduct(updatedProduct);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Cập nhật sản phẩm thành công!'),
-              backgroundColor: Colors.green,
-            ),
+          UtilsService.showSuccessMessage(
+            context,
+            'Cập nhật sản phẩm thành công!',
           );
           Navigator.pop(context, true); // Trả về true để báo hiệu có cập nhật
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Lỗi khi cập nhật sản phẩm: $e'),
-              backgroundColor: Colors.red,
-            ),
+          UtilsService.showErrorMessage(
+            context,
+            'Lỗi khi cập nhật sản phẩm: $e',
           );
         }
       }
@@ -137,24 +107,14 @@ class _UpdateProductPageState extends State<UpdateProductPage> {
 
     if (shouldDelete == true) {
       try {
-        await _databaseHelper.deleteProduct(widget.product.id!);
+        await _productService.deleteProduct(widget.product.id!);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Xóa sản phẩm thành công!'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          UtilsService.showSuccessMessage(context, 'Xóa sản phẩm thành công!');
           Navigator.pop(context, true); // Trả về true để báo hiệu có thay đổi
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Lỗi khi xóa sản phẩm: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          UtilsService.showErrorMessage(context, 'Lỗi khi xóa sản phẩm: $e');
         }
       }
     }

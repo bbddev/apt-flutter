@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'product.dart';
-import 'database_helper.dart';
+import 'services/services.dart';
 
 class CreateProductPage extends StatefulWidget {
   const CreateProductPage({Key? key}) : super(key: key);
@@ -14,7 +14,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
   final _productNameController = TextEditingController();
   final _priceController = TextEditingController();
   final _quantityController = TextEditingController();
-  final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final ProductService _productService = ProductService();
 
   @override
   void dispose() {
@@ -25,41 +25,15 @@ class _CreateProductPageState extends State<CreateProductPage> {
   }
 
   String? _validateProductName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Vui lòng nhập tên sản phẩm';
-    }
-    if (value.length < 2) {
-      return 'Tên sản phẩm phải có ít nhất 2 ký tự';
-    }
-    return null;
+    return UtilsService.validateProductName(value);
   }
 
   String? _validatePrice(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Vui lòng nhập giá sản phẩm';
-    }
-    final price = int.tryParse(value);
-    if (price == null) {
-      return 'Giá phải là số nguyên';
-    }
-    if (price <= 0) {
-      return 'Giá phải lớn hơn 0';
-    }
-    return null;
+    return UtilsService.validatePrice(value);
   }
 
   String? _validateQuantity(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Vui lòng nhập số lượng';
-    }
-    final quantity = double.tryParse(value);
-    if (quantity == null) {
-      return 'Số lượng phải là số';
-    }
-    if (quantity <= 0) {
-      return 'Số lượng phải lớn hơn 0';
-    }
-    return null;
+    return UtilsService.validateQuantity(value);
   }
 
   Future<void> _saveProduct() async {
@@ -71,14 +45,9 @@ class _CreateProductPageState extends State<CreateProductPage> {
       );
 
       try {
-        await _databaseHelper.insertProduct(product);
+        await _productService.addProduct(product);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Thêm sản phẩm thành công!'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          UtilsService.showSuccessMessage(context, 'Thêm sản phẩm thành công!');
           Navigator.pop(
             context,
             true,
@@ -86,12 +55,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Lỗi khi thêm sản phẩm: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          UtilsService.showErrorMessage(context, 'Lỗi khi thêm sản phẩm: $e');
         }
       }
     }
