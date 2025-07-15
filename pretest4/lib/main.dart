@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'product.dart';
 import 'database_helper.dart';
 import 'create_product_page.dart';
+import 'update_product_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -97,6 +98,20 @@ class _ProductListPageState extends State<ProductListPage> {
     );
 
     // Nếu có sản phẩm mới được thêm, reload danh sách
+    if (result == true) {
+      _loadProducts();
+    }
+  }
+
+  Future<void> _navigateToUpdateProduct(Product product) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UpdateProductPage(product: product),
+      ),
+    );
+
+    // Nếu có sản phẩm được cập nhật hoặc xóa, reload danh sách
     if (result == true) {
       _loadProducts();
     }
@@ -213,7 +228,7 @@ class _ProductListPageState extends State<ProductListPage> {
                       ),
                       trailing: const Icon(Icons.arrow_forward_ios),
                       onTap: () {
-                        // Có thể thêm chức năng xem chi tiết hoặc chỉnh sửa ở đây
+                        _navigateToUpdateProduct(product);
                       },
                     ),
                   );
